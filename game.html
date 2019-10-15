@@ -1,0 +1,130 @@
+<!doctype html>
+
+<head>
+    <title>canvas</title>
+</head>
+
+<body>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+</body>
+<script>
+    var canvas, canvasContext;
+
+    window.onload = function() {
+        canvas = document.getElementById('gameCanvas');
+        canvasContext = canvas.getContext('2d');
+
+        document.addEventListener('keydown', keyPressed);
+        document.addEventListener('keyup', keyReleased);
+
+        setInterval(mainloop, 1000 / 50);
+    }
+    
+    var diffculty = prompt('diffaculty','hard or easy');
+    var pass =6
+    if(diffculty != 'easy' || diffculty)
+    
+    
+    //player
+    var PlayerXPos = 90;
+    var PlayerYPos = 300;
+    const P_SIZEX = 21;
+    const P_SIZEY = 30;
+    var jumping = false;
+    //minotaur
+    var minotaurXpos = 350
+    var minotaurYpos = 280
+    const minotaur_SIZEX = 40;
+    const minotaur_SIZEY = 60;
+
+    //Object
+    var OpSIZEX = 20;
+    var OpSIZEY = 20;
+    var OpXPos = 300;
+    var OpYPos = 320;
+    var Opspeed = 3;
+    var OPvelo = 2;
+    //    var Op
+
+    var groundHeight = 60; 
+    var dirtHeight = 48; 
+    var yVel = 0;
+
+    const SPACE_KEY = 32;
+    var spaceKeyPressed = false;
+    var ground = false;
+
+    function mainloop() {
+        colorRect(0, 0, canvas.width, canvas.height, 'black'); //bg
+
+        colorRect(PlayerXPos, PlayerYPos, P_SIZEX, P_SIZEY, '#ffbf96') //player  
+
+        colorRect(minotaurXpos, minotaurYpos, minotaur_SIZEX, minotaur_SIZEY, 'blue') //minotaur
+        colorRect(0, canvas.height - groundHeight, canvas.width, groundHeight, '#24A032'); //ground
+        colorRect(0, canvas.height - dirtHeight, canvas.width, dirtHeight, '#B5651D');
+        
+        colorRect(OpXPos, OpYPos, OpSIZEX, OpSIZEY, '#ff9d00 ') //box
+
+        playerMove();
+        boxMove();
+        grounded();
+
+    }
+
+
+
+    function keyPressed(evt) {
+        if (evt.keyCode == SPACE_KEY) {
+            spaceKeyPressed = true;
+        }
+    }
+
+    function keyReleased(evt) {
+        if (evt.keyCode == SPACE_KEY) {
+            spaceKeyPressed = false;
+        }
+    }
+
+    function playerMove() {
+
+        if (spaceKeyPressed && jumping == false) { 
+            jumping = true;
+            ground = false;
+            yVel = -3  ;
+            console.log(yVel + ':' + PlayerYPos);
+        }
+
+        //        if(jumping){
+        yVel += 0.1;
+        PlayerYPos += yVel;
+        yVel *= 0.981;
+        console.log('jumping: ' + jumping + ' : ' + yVel + ':' + PlayerYPos);
+        //        }
+    }
+    
+    function boxMove(){
+        OpXPos -= Opspeed;
+        if (OpXPos < 0){ 
+        
+        OpXPos = canvas.width;
+        
+        }
+         
+    }
+
+    function grounded() {
+        if (PlayerYPos + P_SIZEY > canvas.height - groundHeight) {
+            yVel = 0;
+            PlayerYPos = canvas.height - groundHeight - P_SIZEY;
+            ground = true;
+            jumping = false;
+        }
+    }
+
+
+    function colorRect(topLeftX, topLeftY, boxWidth, boxHeight, colourFill) {
+        canvasContext.fillStyle = colourFill;
+        canvasContext.fillRect(topLeftX, topLeftY, boxWidth, boxHeight);
+    }
+
+</script>
