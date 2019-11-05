@@ -1,0 +1,243 @@
+<!doctype html>
+
+<head>
+    <title>canvas</title>
+</head>
+
+<body>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <h1>hit space bar to avoid the boxs</h1>
+</body>
+<script>
+    var canvas, canvasContext;
+
+    window.onload = function() {
+        canvas = document.getElementById('gameCanvas');
+        canvasContext = canvas.getContext('2d');
+
+        document.addEventListener('keydown', keyPressed);
+        document.addEventListener('keyup', keyReleased);
+
+        setInterval(mainloop, 1000 / 50);
+    }
+    // asks name
+    var name = '';
+    var namepass = false;
+    while(namepass == false){
+        name = prompt('what is your name fellow object','');
+        if(name.length > 0 && name != null){
+            namepass = true;
+        }
+    }
+// diffculty godlike impossble
+    var gameRun = true;
+    var diffculty = '';
+    var diffcultyPass = false;
+
+    var maxSpeed = 0;
+    var minSpeed = 0;
+
+    while (diffcultyPass == false) {
+        diffculty = prompt('how hard?', 'easy');
+        if (diffculty == 'easy' || diffculty == 'hard') {
+            diffcultyPass = true;
+        }
+    }
+
+    if (diffculty == 'easy') {
+        maxSpeed = 5;
+        minSpeed = 2;
+    } else {
+        maxSpeed = 20;
+        minSpeed = 10;
+    }
+
+
+    //player
+    var PlayerXPos = 90;
+    var PlayerYPos = 300;
+    const P_SIZEX = 21;
+    const P_SIZEY = 30;
+    var jumping = false;
+    //minotaur
+    var minotaurXpos = 0
+    var minotaurYpos = 0
+    const minotaur_SIZEX = 40;
+    const minotaur_SIZEY = 60;
+
+
+
+    var boxes = [];
+
+
+
+
+    //   Object
+
+    var OpXPos = 300;
+    var OpYPos = 320;
+    var Opspeed = 4;
+    var OPvelo = 2;
+    var OPSIZE = 20;
+    //    var Op
+
+    var groundHeight = 60;
+    var dirtHeight = 48;
+    var yVel = 0;
+
+    //space key pressed
+    const SPACE_KEY = 32;
+    var spaceKeyPressed = false;
+    var ground = false;
+
+    // score and game
+    var score = 0;
+    var lifes = 10;
+
+    var totalEnemies = 2;
+    var startingPos = true;
+
+    function mainloop() {
+        if (gameRun) {
+
+
+            colorRect(0, 0, canvas.width, canvas.height, '#8ED5FA'); //bg
+
+            colorRect(PlayerXPos, PlayerYPos, P_SIZEX, P_SIZEY, '#ffbf96') //player  
+
+            colorRect(minotaurXpos, minotaurYpos, minotaur_SIZEX, minotaur_SIZEY, 'blue') //minotaur
+            colorRect(0, canvas.height - groundHeight, canvas.width, groundHeight, '#24A032'); //ground
+            colorRect(0, canvas.height - dirtHeight, canvas.width, dirtHeight, '#B5651D'); // dirt
+
+            //            colorRect(OpXPos, OpYPos, OPSIZE, OPSIZE, '#ff9d00 ') //box
+
+            drawText('score: ' + score, 50, 50, '20px Arial', 'white')
+            drawText('lifes: ' + lifes, 250, 50, '20px Arial', 'red')
+            playerMove();
+
+            boxMove();
+            boxDraw();
+            grounded();
+
+            if (startingPos) {
+                minotaurXpos = canvas.width - minotaur_SIZEX;
+                minotaurYpos = canvas.height - minotaur_SIZEY - groundHeight;
+                PlayerYPos = canvas.height - groundHeight - P_SIZEY;
+                for (i = 0; i < totalEnemies; i++) {
+                    makeEnemy();
+                    startingPos = false;
+                }
+
+            }
+            if (lifes <= 0) {
+                gameRun = false;
+            }
+        } else {
+            colorRect(0, 0, canvas.width, canvas.height, 'black'); //bg 
+           drawText( name +' your score was: ' + score, canvas.width * 0.1, canvas.height / 2, '20px Arial', 'white')
+        }
+
+    }
+    // end main loop
+
+    function drawText(msg, x, y, f, c) {
+        canvasContext.fillStyle = c;
+        canvasContext.font = f;
+        canvasContext.fillText(msg, x, y);
+    }
+
+    //keypress
+    function keyPressed(evt) {
+        if (evt.keyCode == SPACE_KEY) {
+            spaceKeyPressed = true;
+        }
+    }
+
+    function keyReleased(evt) {
+        if (evt.keyCode == SPACE_KEY) {
+            spaceKeyPressed = false;
+        }
+    }
+    // gravity
+    function playerMove() {
+
+        if (spaceKeyPressed && jumping == false) {
+            jumping = true;
+            ground = false;
+            yVel = -4;
+            console.log(yVel + ':' + PlayerYPos);
+        }
+
+        if (jumping) {
+            yVel += 0.1;
+            PlayerYPos += yVel;
+            yVel *= 0.981;
+            //            console.log('jumping: ' + jumping + ' : ' + yVel + ':' + PlayerYPos);
+        }
+    }
+
+    // makeEnemy 
+    function makeEnemy() {
+        const BOXS_SIZE = 20;
+        //var BoxsXpos = Math.floor(Math.random() * (canvas.width - BOXS_SIZE));
+        var BoxXPos = minotaurXpos;
+        var BoxYpos = minotaurYpos + minotaur_SIZEY - BOXS_SIZE;
+        var BoxSpeed = Math.floor(Math.random() * (maxSpeed - minSpeed)) + minSpeed;
+        var Boxvelo = 2;
+
+        var box = {
+            BoxXpos: BoxXPos,
+            BoxYpos: BoxYpos,
+            BOXS_SIZE: BOXS_SIZE,
+            //BoxColor: '#ff9d00'
+            BoxSpeed: BoxSpeed,
+            Boxvelo: Boxvelo,
+        }
+
+        boxes.push(box);
+
+    }
+
+    function boxDraw() {
+        boxes.forEach(function(box, i) {
+            colorRect(box.BoxXpos, box.BoxYpos, box.BOXS_SIZE, box.BOXS_SIZE, 'brown');
+        });
+    }
+    //boxmove
+    function boxMove() {
+        boxes.forEach(function(box, i) {
+
+            box.BoxXpos -= box.BoxSpeed;
+
+            if (box.BoxXpos < 0) {
+                box.BoxXpos = canvas.width;
+                box.BoxSpeed = Math.floor(Math.random() * (maxSpeed - minSpeed)) + minSpeed;
+                score++;
+            }
+
+            if (box.BoxXpos + box.BOXS_SIZE > PlayerXPos && box.BoxXpos < PlayerXPos + P_SIZEX && box.BoxYpos + box.BOXS_SIZE > PlayerYPos && box.BoxYpos < PlayerYPos + P_SIZEY) {
+                console.log('hit');
+                box.BoxSpeed = Math.floor(Math.random() * (10 - 5) + 5);
+                box.BoxXpos = canvas.width;
+                lifes--;
+            }
+
+        });
+    }
+    //play dosnt go though ground
+    function grounded() {
+        if (PlayerYPos + P_SIZEY > canvas.height - groundHeight) {
+            yVel = 0;
+            PlayerYPos = canvas.height - groundHeight - P_SIZEY;
+            ground = true;
+            jumping = false;
+        }
+    }
+
+
+    function colorRect(topLeftX, topLeftY, boxWidth, boxHeight, colourFill) {
+        canvasContext.fillStyle = colourFill;
+        canvasContext.fillRect(topLeftX, topLeftY, boxWidth, boxHeight);
+    }
+
+</script>
